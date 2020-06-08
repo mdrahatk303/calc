@@ -10,13 +10,14 @@ class App extends Component{
     this.state={
       
       current: "0",
-      previous: []
+      previous: [],
+      invalid:false//take care of cases like 2.3.(multiple dot)
     }
   }
 
   reset=(symbol)=>  {
     
-      this.setState({current:"0",previous:[]})
+      this.setState({current:"0",previous:[],invalid:false})
   
    
   }
@@ -26,22 +27,58 @@ class App extends Component{
     if(['/','*','+','-'].indexOf(symbol)>-1)
     {
         let floaty=[];
-        let input=this.state.current+symbol;
-        floaty.push(input);
-       
-        this.setState({previous:floaty,current:"0"});
+        let cur=this.state.current;
+        
+
+        //Handles case like 23.+34("." is at the last position)
+        if(cur[cur.length-1]==='.')
+        {
+          let input=this.state.current+'0'+symbol;
+          
+          floaty.push(input);
+          this.setState({previous:floaty,current:"0"});
+        }
+        else
+        {
+          let input=this.state.current+symbol;
+          floaty.push(input);
+          this.setState({previous:floaty,current:"0"});
+        }
+
+
+        
     }
     else{
       if(this.state.current==="0")
       {
-        //console.log(this.state.current);
-        this.setState({current:""});
-        this.setState({current:symbol});
+          //console.log(this.state.current);
+          if(symbol===".")
+          {
+            this.setState({invalid:true});
+          }
+          this.setState({current:""});
+          this.setState({current:symbol});
       }
       else
       {
         //console.log(typeof(this.state.current)+"here"+this.state.current);
-        this.setState({current:this.state.current+symbol});
+        if(symbol===".")
+        {
+          //console.log("here . set to true")
+            if(this.state.invalid===false)
+            {
+                //console.log("here invalid set to true")
+                this.setState({current:this.state.current+symbol,invalid:true});
+            }
+            else
+            {
+                this.setState({current:'0',invalid:false});
+            }
+        }
+        else
+        {
+            this.setState({current:this.state.current+symbol});
+        }
       }
     }
   }
@@ -81,7 +118,7 @@ class App extends Component{
     ]
 
     return(
-      <div className="App">
+      <div id="App">
         <div className="resultArea">
             <div>
               <input className="floaty" type="text" value={this.state.previous}/>
